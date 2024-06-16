@@ -1610,7 +1610,16 @@ store.on("error", () => {
 	> The secret that we were using in sessionOptions and store is removed from there and added to the .env file. The prior secret is replace with a random string and is stored in variable SECRET in .env, and then imported in app.js wherever required, using process.env.SECRET
 
 NOTE: We won't push .env (contains sensitive info) and node_modules (can be downloaded again anytime) into the git repo. To do so, we add the names of these files in a file named '.gitignore', and git doesn't consider them in any commit or push operation.
-	
+
+* Now we're ready to use git. Follow the steps below
+git init
+git add . 
+git commit -m "Added Project Files"
+
+************* 5. Connect render with GitHub ************
+* First we created a git repo "WanderLust", and then connected this remote repo to our project folder.
+* Then we connected this git repo with render. In runtime, write 'Node', in build command write 'npm install' and in start command write 'node app.js'. Here we're are not using nodemon app.js bcoz we won't be making any changes that require restarting of the server.
+* Select the free tier in instance type and in advanced options toggle auto-deploy to "NO" because we will manually handle deploys
 
 
 
