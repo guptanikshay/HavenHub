@@ -1619,7 +1619,15 @@ git commit -m "Added Project Files"
 ************* 5. Connect render with GitHub ************
 * First we created a git repo "WanderLust", and then connected this remote repo to our project folder.
 * Then we connected this git repo with render. In runtime, write 'Node', in build command write 'npm install' and in start command write 'node app.js'. Here we're are not using nodemon app.js bcoz we won't be making any changes that require restarting of the server.
-* Select the free tier in instance type and in advanced options toggle auto-deploy to "NO" because we will manually handle deploys
+* Select the free tier in instance type and in advanced options toggle auto-deploy to "NO" because we will manually handle deploys.
+* Then click on 'create new service' to deploy the project and the deployment process will start. It will fail this time because we've not added the environment variables yet.
+
+************ 6. Create New Service ***********
+* Alongwith adding environment variables we will also configure Atlas. Initially our project was stored on our local system and our local system's IP was authorized to access the DB on Atlas, but now it is on Render, so we will add Render's IP in Atlas so that it gets access to the DB.
+* Go to the Environment option in the left panel in Render and add all the environment variables to it.
+* Go to Logs in left panel and click on Connect to view all the static outbound IP addresses. Now copy these address one by one and add them to Network Access in Atlas to whitelist them ( means to authorize them to access Atlas DB).
+* Now all the work is done, just click on clear build cache and deploy in manual deploy and your project will get deployed on render.
+
 
 
 
