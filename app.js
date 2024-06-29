@@ -20,6 +20,7 @@ const LocalStrategy = require("passport-local");
 const User = require("./models/user.js");
 const multer = require("multer");
 const upload = multer({ dest: "uploads/" }); // If this folder does not exist, multer will create it.
+const Listing = require("./models/listing.js");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -67,10 +68,6 @@ async function main() {
   await mongoose.connect(dbUrl);
 }
 
-// app.get("/", (req, res) => {
-//   res.send("Hi, I am root");
-// });
-
 app.use(session(sessionOptions));
 app.use(flash());
 
@@ -88,16 +85,26 @@ app.use((req, res, next) => {
   next();
 });
 
-// app.get("/demouser", async (req, res) => {
-//   let fakeUser = new User({
-//     email: "koshubhai@gmail.com",
-//     username: "koshu",
-//   }); // Note that in our user model we only defined email and no username, but still we can add a username here as because passportLocalMongoose automatically adds a username.
+app.get("/", (req, res) => {
+  res.render("home.ejs");
+});
 
-//   let registeredUser = await User.register(fakeUser, "fitkoshu"); // register is a convenience method to register a new user instance with a given password. Checks if the username is unique.
-//   res.send(registeredUser);
-// });
-
+app.get("/search", async (req, res) => {
+  const query = req.query.query;
+  let results;
+  try {
+    if (query) {
+      results = await Listing.find({
+        title: { $regex: query, $options: "i" }, // i for case-insensitive
+      });
+    } else {
+      results = await Listing.find();
+    }
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);

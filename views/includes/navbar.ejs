@@ -6,8 +6,9 @@
     padding: 0 1rem 0 1rem;
   }
   .btn-search:hover {
-    background-color: #fe424d;
-    color: #fff;
+    background-color: #fff;
+    color: #fe424d;
+    border: 2px solid #fe424d;
   }
   .btn-search i {
     display: inline;
@@ -45,7 +46,7 @@
             type="search"
             placeholder="Search destinations"
           />
-          <button class="btn btn-search" type="submit">
+          <button class="btn btn-search" type="submit" onclick="return false">
             <i class="fa-solid fa-magnifying-glass"></i>Search
           </button>
         </form>

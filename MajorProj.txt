@@ -134,12 +134,15 @@ app.use((err, req, res, next) => {
 });
 
 ********** 4. Add wrapAsync *********
-* Created a file wrapAsync.js in public/js, that contains the following code
+* Created a file wrapAsync.js in utils/js, that contains the following code
 module.exports = (fn) => {
   return (req, res, next) => {
     fn(req, res, next).catch(next);
   };
 };
+
+Q. If we are passing our function 'fn' to wrapAsync that takes our custom arguments, how is it able to execute 'fn' with req, res and next?
+Ans: In JavaScript, functions are first-class citizens, meaning they can be passed around as arguments, returned from other functions, and invoked with different contexts and arguments. The wrapAsync function leverages this feature to handle asynchronous route handlers in Express.js.
 
 * Required it in app.js and added it to async function
 app.post(
@@ -152,7 +155,7 @@ app.post(
 );
 
 ********** 5. Add ExpressError **********
-* Created a separate and wrote the ExpressError class in it. Required it in app.js and handled the page not found error like this
+* Created a separate file and wrote the ExpressError class in it. Required it in app.js and handled the 'page not found' error like this
 app.all("*", (req, res, next) => {
   next(new ExpressError(404, "Page not found!"));
 });
@@ -279,7 +282,7 @@ reviews: [
 
 %%%%%%%%%%%%%%% 5. Create Reviews (Step-2) %%%%%%%%%%%%%
 % We will not send the post request of above form at /reviews because reviews are for a specific listing and we need to know that, so it will be sent to /listings/:id/reviews.
-% It is not forbidden to send it to /reviews, but in that we would have to embed the listing Id in the query string or find some other to send the listing Id with the request.
+% It is not forbidden to send it to /reviews, but in that we would have to embed the listing Id in the query string or find some other way to send the listing Id with the request.
 % Added the review route in app.js
 
 app.post("/listings/:id/reviews", async (req, res) => {
@@ -390,7 +393,7 @@ app.delete("/listings/:id/reviews/:reviewId", async (req, res) => {
 
 %%%%%%%%%%%% 10. Handling Delete_Listing %%%%%%%%%%
 % Till now we've sorted that if any review is deleted, its reference in the listing should be deleted as well.
-% Now we need to make sure that if a listing is deleting, all its associated reviews should get deleted as well.
+% Now we need to make sure that if a listing is deleted, all its associated reviews should get deleted as well.
 % We'll create a post mongoose middleware in our listing schema that will delete all the reviews whose ID comes with the listing object
 
 listingSchema.post("findOneAndDelete", async (listing) => {
@@ -472,7 +475,7 @@ const router = express.Router({ mergeParams: true });
 
 ************* 5. Web Cookies **********
 * Basic introduction about cookies: store data blocks about website, enhances user experience, used for personalisation, tracking, and session management.
-* In session management, the cookies store information about our current activity on the website, such as Amazon stores the item we've viewed and added to the cart, but not bought yet so it is not saved in the DB.
+* In session management, the cookies store information about our current activity on the website, such as Amazon stores the items we've viewed and added to the cart, but not bought yet so it is not saved in the DB.
 * Cookies are stored in the form of { name, value } pair.
 
 ************* 6. Sending Cookies **********
@@ -516,7 +519,7 @@ app.get("/verify", (req, res) => {
   res.send("verified");
 }); 
 
-NOTE: If the entire cookie value is altered, the output of res.sendCookies is and empty set and if only main value is altered and rest encryption is kept same, then cookie is printed as { "made-in", false }
+NOTE: If the entire cookie value is altered, the output of req.signedCookies is an empty set and if only main value is altered and rest encryption is kept same, then cookie is printed as { "made-in", false }
 
 
 
@@ -537,9 +540,9 @@ NOTE: If the entire cookie value is altered, the output of res.sendCookies is an
 app.use(session({secret: "mysupersecretstring"}))
 
 *********** 3. Exploring session options **********
-* If we open the same website in different tabs in the same browser, it is considered as same session in express (i.e., the same is trying to access the website using different tabs), but if it is opened in a different browser, it is handled as a separate session.
+* If we open the same website in different tabs in the same browser, it is considered as same session in express (i.e., the same user is trying to access the website using different tabs), but if it is opened in a different browser, it is handled as a separate session.
 * To remove the deprecated warnings from node, we set the options resave as false and saveUninitialized as true. 'resave' saves the session information in the memory even if there has been no change in the session, and 'saveUninitialized' saves the session information even if the session is not initialized yet.
-NOTE: The 'MemoryStore' (default server side session storage) is not purposely not designed for a production environment. It will leak memory under most conditions, does not scale past a single process, and is meant for debugging and developing.
+NOTE: The 'MemoryStore' (default server side session storage) is purposely not designed for a production environment. It will leak memory under most conditions, does not scale past a single process, and is meant for debugging and developing.
 For production phase, we need to use other compatible stores such as Cassandra store, mongo store, etc. 
 
 ********* 4. Storing and using session info ********
@@ -568,7 +571,7 @@ app.get("/hello", (req, res) => {
 * connect-flash can only be used with session.
 * It is an npm package and can be installed using 'npm i connect-flash'. Don't forget to require it.
 * To use connect-flash, we simply write 'app.use(flash())'. Now, to display a message before a res.redirect(), we use 'req.flash("<key>", "<msg>")', where key is the identifier string of this flash and msg is message contained in the flash.
-* A flash won't be visible just yet. To show it on the page, we make an ejs template for it and pass this message as a variable to this template, again by using req.flash() method, but this time we only key is passed and the message gets extracted from it, as shown in below code:
+* A flash won't be visible just yet. To show it on the page, we make an ejs template for it and pass this message as a variable to this template, again by using req.flash() method, but this time only key is passed and the message gets extracted from it, as shown in below code:
 
 app.get("/hello", (req, res) => {
   // res.send(`hello, ${req.session.name}`);
@@ -635,7 +638,7 @@ const sessionOptions = {
 
 ************ 9. Implement flash in project **********
 * Install and require 'connect-flash'. Now write 'app.use(flash());' to use flash.
-NOTE: app.use(flash()) should be written before the routes in flash is supposed to be used, because we will use use flash with the help of those routes only.
+NOTE: app.use(flash()) should be written before the routes in which flash is supposed to be used, because we will use flash with the help of those routes only.
 
 * Add 'req.flash("success", "New Listing Created!")' right before the redirect statement in the route that creates a new review, as we wish to display this message right after a new listing is added. Now this flash can be accessed in a middleware in app.js
 
@@ -707,13 +710,13 @@ STEP 3: Added the error message in flash.ejs
 * Authorization is the process of verifying what specific applications, files, and data the user has access to.
 
 ************ 2. How are passwords stored *********
-* We never store the passwords as it is, for obvious reasons. We store their hashed forms. Hashed is generated using a hashing function.
+* We never store the passwords as it is, for obvious reasons. We store their hashed forms. Hashed form is generated using a hashing function.
 * When a user tries to login to the website/application, the password entered by him is again passed into the hashing function and its output is compared with the one stored in DB, and if they match, user is allowed to login.
 NOTE: For the same input, the hashing function's output will remain same.
 
 *********** 3. What is Hashing **********
 * In hashing:
-	> For every input, there is a fixed output. (if input same then output same)
+	> For every input, there is a fixed output. (if input is same then output is same)
 	> One way functions are used, that is, we cannot get the input from output. ( modulus, modulo operator, are common one way function)
 	> For different input, there are different outputs but of same length.
 	> Small changes in input should bring large changes in output.
@@ -726,7 +729,7 @@ NOTE: For the same input, the hashing function's output will remain same.
 ********* 5. Passport - Getting Started *********
 * passportjs.org
 * Passport is an authentication middleware for Node.js. It can be used with express-based web applications and supports authentication using a username and password, facebook, X, google and more.
-* In this module, we'll start with our basis local module. First of all we install some libraries as shown:
+* In this module, we'll start with our basic local module. First of all we install some libraries as shown:
 npm i passport
 nmp i passport-local
 npm i passport-local-mongoose // Installed this library as upper two work fine only with SQL and other databases, and not with MongoDB and this library assists the working of Passport with MongoDB.
@@ -775,14 +778,14 @@ app.get("/demouser", async (req, res) => {
     username: "koshu",
   }); // Note that in our user model we only defined email and no username, but still we can add a username here as because passportLocalMongoose automatically adds a username.
 
-  let registeredUser = await User.register(fakeUser, "fitkoshu"); // register is a convenience method to register a new user instance with a given password. Checks if the username is unique.
+  let registeredUser = await User.register(fakeUser, "fitkoshu"); // register is a convenient method to register a new user instance with a given password. It also checks if the username is unique.
   res.send(registeredUser);
 });
 
 * Passport uses pbkdf2 hashing algorithm.
 
 ********* 9. Signup User **********
-* Created a new user route 'user.js' for user signup/login. 
+* Created a new user route 'user.js' in 'routes/' for user signup/login. 
 const express = require("express");
 const router = express.Router();
 
@@ -804,7 +807,7 @@ const userRouter = require("./routes/user.js");
 ********** 10. SignUp user - POST **********
 * Created a route that accepts the post request sent by the signup form. As we make changes in DB here, so it is async process and hence we used async/await.
 * To handle the same username error, we added wrapAsync() to our code.
-* Simply adding wrapAsync() was redirecting us to a page that had nothing in it and the user would feel lost in the website, so to enhance the user experience we added handled this using try-catch as well.
+* Simply adding wrapAsync() was redirecting us to a page that had nothing in it and the user would feel lost in the website, so to enhance the user experience we handled this by using try-catch as well.
 * In the catch, we flashed the error message and then redirected the page to the signup form again.
 
 router.post(
@@ -886,7 +889,7 @@ router.get("/new", isLoggedIn, (req, res) => {
 
 ************ 2. Logout user *************
 * To logout an user, we'll use passport's inbuilt method req.logout(), which uses deserializeUser() to remove the user's info from the session and the user gets logged out.
-* req.logout() is implement in the user.js route
+* req.logout() is implemented in the user.js route
 router.get("/logout", (req, res, next) => {
   req.logout((err) => {
     if (err) {
@@ -906,8 +909,8 @@ router.get("/logout", (req, res, next) => {
         <a class="nav-link" href="/logout">Logout</a>
       </div>
 
-* But that's not how it should be, as a user should see only the logout option if he is logged in and he should signup/login if he is logged out. So we do this by checking whether the 'req.user' object exists or not, and if it does that means user is logged in.
-NOTE: We cannot directly access the req object in ejs template, but we can access the local variables in res.locals, so we create a new variable 'currUser' in app.js and access it req.user through it.
+* But that's not how it should be, as a user should see only the logout option if he is logged in and he should see signup/login if he is logged out. So we do this by checking whether the 'req.user' object exists or not, and if it does that means user is logged in.
+NOTE: We cannot directly access the req object in ejs template, but we can access the local variables in res.locals, so we create a new variable 'currUser' in app.js and access req.user through it.
 
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
@@ -965,7 +968,7 @@ router.post(
     res.redirect(req.session.redirectUrl);
   }
 );
-* But this won't work because by default passport resets the req object after login, so req.session.redirectUrl becomes undefined and it throws an error. To handle this, req.session.redirectUrl can be saved in res.locals and as passport does not have access to delete locals, it'll work. We create another middleware in middleware.js to save the redirectUrl, and then require it in routes/user.js and use it in login route before passport logs in the user.
+* But this won't work because by default passport resets the req object after login, so req.session.redirectUrl becomes undefined and it throws an error. To handle this, req.session.redirectUrl can be saved in res.locals and as passport does not delete locals, it'll work. We create another middleware in middleware.js to save the redirectUrl, and then require it in routes/user.js and use it in login route before passport logs in the user.
 
 module.exports.saveRedirectUrl = (req, res, next) => {
   if (req.session.redirectUrl) {
@@ -1109,7 +1112,7 @@ const listing = await Listing.findById(id)
       .populate({ path: "reviews", populate: { path: "author" } })
       .populate("owner");
 * Now we add <%= review.author.username %> instead of 'Brad Pitt' in show.ejs in review title, and delete all the existing reviews as well as they did not have any usernames.
-* Now we protected the delete review route by creating a middleware that checks whether the user is the author of that review or not and if he isn't he won't be able to delete that review. First we added the middleware isLoggedIn and then we added isReviewAuthor DELETE REVIEW ROUTE in review.js
+* Now we protected the delete review route by creating a middleware that checks whether the user is the author of that review or not and if he isn't he won't be able to delete that review. First we added the middleware isLoggedIn and then we added isReviewAuthor in DELETE REVIEW ROUTE in review.js
 
 module.exports.isReviewAuthor = async (req, res, next) => {
   const { id, reviewId } = req.params;
@@ -1240,7 +1243,7 @@ router
 AWS or Microsoft Azure or Google Drive. But these services are paid and are used in production phase, and in development phase we use a free service.
 
 ********* 7. Manipulating form ********
-* Our form cannot send data to backend because it uses urlencoded data. To enable it to send data to backend, another type of encoding is required. So we add the field enctype our form and make it equal to 'multipart/form-data', which is used for files.
+* Our form cannot send data to backend because it uses urlencoded data. To enable it to send data to backend, another type of encoding is required. So we add the field enctype to our form and make it equal to 'multipart/form-data', which is used for files.
       <form
         method="POST"
         action="/listings"
@@ -1248,7 +1251,7 @@ AWS or Microsoft Azure or Google Drive. But these services are paid and are used
         class="needs-validation"
         enctype="multipart/form-data"
       >
-* But right now our backend won't be able to understand multipart/form-data format as we only parse urlencoded data format. To parse multipart/form-data format we'll use the npm package multer. Multer is a nodejs middleware for handling multipart form data and it will not process any which is not multipart.
+* But right now our backend won't be able to understand multipart/form-data format as we only parse urlencoded data format. To parse multipart/form-data format we'll use the npm package multer. Multer is a nodejs middleware for handling multipart form data and it will not process any data which is not multipart.
 * First of all we install (), require and initialize multer.
 const multer = require("multer");
 const upload = multer({dest: "uploads/"}); // If this folder does not exist, multer will create it.
@@ -1260,7 +1263,7 @@ NOTE: This storing the files in a folder is temporary method, later on we'll be 
   });
 
 ********** 8. Cloud Storage **********
-* We'll use cloudinary as our cloud storage. Now, cloudinary consists of Product Environment Credentials (CloudName, API Key, API Secret) that are supposed to include in a code (.env file), but this should not be shared with anyone and should not be uploaded online on any platform.
+* We'll use cloudinary as our cloud storage. Now, cloudinary consists of Product Environment Credentials (CloudName, API Key, API Secret) that are supposed to be included in a code (.env file), but this should not be shared with anyone and should not be uploaded online on any platform.
 * We create a '.env' file to store our credentials and it has fixed format of data input (KEY=value).
 
 SECRET=iwannabewithyou
@@ -1281,7 +1284,11 @@ console.log(process.env.SECRET);
 
 *********** 9. Store files **********
 * Install two npm packages: cloudinary and multer-storage-cloudinary
-* Now create a new file 'cloudConfig.js' and require cloudinary version 2 and multer-storage-cloudinary
+* Now create a new file 'cloudConfig.js' and require 'cloudinary' version 2 and multer-storage-cloudinary
+
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
 * Now add configuration code. Configuration basically means making a connection. Here we are making a connection between our backend and cloudinary account.
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -1314,16 +1321,18 @@ const upload = multer({ storage });
 
 ************ 10. Save Link in Mongo ***********
 * Before doing that, we will modify our image field in listing schema. Till now it only consisted of a url, but henceforth it will have a filename as well, which will of use when we wish to update/delete this image.
+
 INITIAL IMAGE SCHEMA
 image: {
     type: String,
     default:
-      "https://vignette.wikia.nocookie.net/oggyandthecockroaches/images/e/ea/Oggy's_House.png/revision/latest?cb=20180430192556",
+      "https://vignette.wikia.nocookie.net/oggyandthecockroaches/images/e/ea/Oggy's_House.png/revision/latest?cb= 20180430192556",
     set: (v) =>
       v === ""
         ? "https://vignette.wikia.nocookie.net/oggyandthecockroaches/images/e/ea/Oggy's_House.png/revision/latest?cb=20180430192556"
         : v,
   },
+
 FINAL IMAGE SCHEMA
 image: {
     url: String,
@@ -1349,7 +1358,7 @@ module.exports.createListing = async (req, res, next) => {
 
 ****************************************** PROJECT PHASE 3 (Part B) *****************************************
 ************ 1. Edit Listing Image ***********
-* Alter the editing listing form such that it becomes capable of receiving an uploaded image.
+* Alter the edit listing form such that it becomes capable of receiving an uploaded image.
 * STEPS:
 	1. Make the form capable of uploading files and sending them to backend by setting the enctype to "multipart/form-data"
 	2. Take the uploaded image and send it to cloudinary 
@@ -1369,7 +1378,7 @@ router.route("/:id")
 module.exports.updateListing = async (req, res) => {
   let { id } = req.params;
   let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
-  if (typeof req.file !== "undefined") { // This is done because if no new image is upload in the edit form, req.file will be undefined and accessing its properties will lead to error.
+  if (typeof req.file !== "undefined") { // This is done because if no new image is uploaded in the edit form, req.file will be undefined and accessing its properties will lead to error.
     let url = req.file.path;
     let filename = req.file.filename;
     listing.image = { url, filename };
@@ -1385,7 +1394,7 @@ module.exports.updateListing = async (req, res) => {
           <p>Original Listing Image</p>
           <img src="<%= listing.image.url %>" />
         </div>
-* But the problem here is that when we try to render the image like this, it shows in original quality and its just a waste of time as we simply need a preview.
+* But the problem here is that when we try to render the image like this, it shows in original quality and its just a waste of resources as we simply need a preview.
 * To handle this, we use cloudinary's inbuilt image transformations, using which we reduce the image's pixels before rendering it as we insert the parameters in url after 'upload' and before our 'imageId'.
 * We add this in renderEditForm in controllers/listing.js
   	let originalImageUrl = listing.image.url;
@@ -1403,7 +1412,7 @@ module.exports.updateListing = async (req, res) => {
 ************* 1. Fixing Home Page ***********
 * Made the index.js page as home page. Wrote Signup, Login, Logout in bold.
 * Changed 'Add New Listing' to 'Airbnb your home' and moved it to the right.
-* Removed the '/' route from app.js
+* Removed the '/' route (HOME ROUTE) from app.js
 
 ************* 2. Add UI for filters **********
 * Removed 'All Listings' text from index.ejs and added a div to store all the filters.
@@ -1627,6 +1636,140 @@ git commit -m "Added Project Files"
 * Go to the Environment option in the left panel in Render and add all the environment variables to it.
 * Go to Logs in left panel and click on Connect to view all the static outbound IP addresses. Now copy these address one by one and add them to Network Access in Atlas to whitelist them ( means to authorize them to access Atlas DB).
 * Now all the work is done, just click on clear build cache and deploy in manual deploy and your project will get deployed on render.
+
+
+************************************* ADDING SEARCH FUNCTIONALITY *************************************
+* Added 'action="/search"' in the search form
+        <form class="d-flex" role="search" action="/search">
+          <input
+            class="form-control me-2 search-inp"
+            type="search"
+            placeholder="Search destinations"
+          />
+          <button class="btn btn-search" type="submit">
+            <i class="fa-solid fa-magnifying-glass"></i>Search
+          </button>
+        </form>
+* Added a search route in app.js just before the other routes
+app.get("/search", (req, res) => {
+  res.send("Welcome to search route");
+});
+
+* Adding 'action="/search"' in the form troubled us as its not like we are displaying the filtered result only after the user presses the button, it continuously gets filtered.
+
+CODE IN APP.JS:
+app.get("/search", async (req, res) => {
+  const query = req.query.query;
+  let results;
+  try {
+    if (query) {
+      results = await Listing.find({
+        title: { $regex: query, $options: "i" }, // i for case-insensitive
+      });
+    } else {
+      results = await Listing.find();
+    }
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+CODE IN SCRIPT.JS:
+let searchInp = document.querySelector(".search-inp");
+let searchRes = document.querySelector(".search-res");
+
+searchInp.addEventListener("input", async () => {
+  const query = searchInp.value;
+  const response = await fetch(`/search?query=${encodeURIComponent(query)}`);
+  const results = await response.json();
+  displayResults(results);
+});
+
+async function fetchAllListings() {
+  const response = await fetch("/search");
+  const results = await response.json();
+  displayResults(results);
+}
+
+function displayResults(results) {
+  searchRes.innerHTML = ""; // Clear previous results
+  results.forEach((listing) => {
+    const link = document.createElement("a");
+    link.href = `/listings/${listing._id}`;
+    link.className = "listing-link";
+
+    const card = `
+      <div class="card col listing-card">
+        <img
+          src="${listing.image.url}"
+          class="card-img-top"
+          alt="listing_image"
+          style="height: 20rem"
+        />
+        <div class="card-img-overlay"></div>
+        <div class="card-body">
+          <p class="card-text">
+            <b>${listing.title}<br /></b>
+            &#8377;${listing.price.toLocaleString("en-IN")}/night
+            <i class="tax-info">&nbsp;&nbsp;+18% GST</i>
+            <br />
+          </p>
+        </div>
+      </div>
+    `;
+    link.innerHTML = card;
+    searchRes.appendChild(link);
+  });
+}
+
+fetchAllListings();
+
+
+********************************* ADDING HOME PAGE ********************************
+CODE IN APP.JS:
+app.get("/", (req, res) => {
+  res.render("home.ejs");
+});
+
+CODE IN HOME.EJS:
+<% layout("/layouts/boilerplate") %>
+<style>
+  .home {
+    text-align: center;
+    margin-top: 1rem;
+    border: 2px solid black;
+    border-radius: 1rem;
+    padding: 1rem 0;
+  }
+  h1 {
+    color: #fe424d;
+  }
+  .homeBtn {
+    background-color: #fe424d;
+    color: #fff;
+    border-radius: 1.5rem;
+    padding: 0.5rem 1.5rem;
+    font-size: 1.5rem;
+    margin-top: 3rem;
+  }
+  .homeBtn:hover {
+    background-color: #fff;
+    color: #fe424d;
+    border: 2px solid #fe424d;
+  }
+</style>
+<div class="home">
+  <h1>Welcome to WanderLust</h1>
+  <h2>Find Places to stay</h2>
+  <h2>Big, small, we have it all</h2>
+  <h2>Family-friendly stays with full kitchens</h2>
+  <a href="/listings"
+    ><button class="btn btn-lg homeBtn">Explore your stays!</button></a
+  >
+</div>
+
+
 
 
 
