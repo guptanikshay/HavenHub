@@ -1270,7 +1270,7 @@ SECRET=iwannabewithyou
 
 * Once the environment variables are saved in '.env', they can be used anywhere in the project. But they cannot be accessed directly, and to access them we install a library 'dotenv', which connect our '.env' file to our backend. Dotenv is a zero-dependency module that loads environment variables from '.env' to process.env.
 
-* To use it, we first install it (npm i dotenv) and then we require it app.js and execute the config() method and then console.log() the environment variables.
+* To use it, we first install it (npm i dotenv) and then we require it in app.js and execute the config() method and then console.log() the environment variables.
 require("dotenv").config();
 console.log(process.env.SECRET);
 
@@ -1320,7 +1320,7 @@ const upload = multer({ storage });
 * Now our image is being sent to backend, backend is able to parse it and that image is being uploaded to cloudinary as well. What remains is to save this image URL into MongoDB.
 
 ************ 10. Save Link in Mongo ***********
-* Before doing that, we will modify our image field in listing schema. Till now it only consisted of a url, but henceforth it will have a filename as well, which will of use when we wish to update/delete this image.
+* Before doing that, we will modify our image field in listing schema. Till now it only consisted of a url, but henceforth it will have a filename as well, which will be of use when we wish to update/delete this image.
 
 INITIAL IMAGE SCHEMA
 image: {
