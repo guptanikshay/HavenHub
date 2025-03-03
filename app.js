@@ -79,9 +79,9 @@ passport.serializeUser(User.serializeUser()); // After a user has logged-in, thi
 passport.deserializeUser(User.deserializeUser()); // This method is used to remove the stored info from the session, after the user ends the session.
 
 app.use((req, res, next) => {
-  res.locals.success = req.flash("success");
-  res.locals.error = req.flash("error");
-  res.locals.currUser = req.user;
+  res.locals.success = req.flash("success") || [];
+  res.locals.error = req.flash("error") || [];
+  res.locals.currUser = req.user || null;
   next();
 });
 
